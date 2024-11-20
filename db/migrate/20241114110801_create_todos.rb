@@ -4,7 +4,7 @@ class CreateTodos < ActiveRecord::Migration[8.0]
       t.string :title
       t.boolean :completed
 
-      t.timestamps
+      t.timestamps 
     end
   end
 end
