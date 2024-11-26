@@ -1,57 +1,65 @@
 class TodosController < ApplicationController
-    skip_forgery_protection only: [:create,:update, :destroy]
+  skip_forgery_protection
+  before_action :authenticate_user!
+  before_action :set_todo_list
+  before_action :set_todo, only: [:update, :destroy]
 
     # GET /todo_lists/:todos_list_id/todos
   def index
-    todo_list = TodoList.find(params[:todo_list_id])
-    todos = todo_list.todos
+    todos = @todo_list.todos
     render json: todos, status: :ok
   end
 
     # POST /todo_list/:todo_list_id/todos
-  def create
-
-    todo_list = TodoList.find(params[:todo_list_id])
-    todo = todo_list.todos.build(todo_params)
-    #default value --pending
-    todo.status ||= 'pending'
-
-
-    if todo.save
-      render json: todo, status: :created
-    else
-      render json: { errors: todo.errors.full_messages }, status: :unprocessable_entity
+    def create
+      todo = @todo_list.todos.build(todo_params)
+      if todo.save
+        render json: todo, status: :created
+      else
+        render json: { errors: todo.errors.full_messages }, status: :unprocessable_entity
+      end
     end
-  end
+    
+
 
   # PUT /todo_list/:todo_list_id/todos/:id
-
-  def update
-    todo_list = TodoList.find(params[:todo_list_id])
-    todo = todo_list.todos.find(params[:id])
-
-  # update the completed status based on the `completed` parameter
-    if todo.update(todo_params)
-      render json: todo, status: :ok
-    else
-      render json: { errors: todo.errors.full_messages }, status: :unprocessable_entity
-    end
+def update
+  if @todo.update(todo_params)
+    render json: @todo, status: :ok
+  else
+    render json: { errors: @todo.errors.full_messages }, status: :unprocessable_entity
   end
+end
+
 
   # DELETE  by /todo_list/:todo_list_id/todos/:id
   def destroy
-    todo_list = TodoList.find(params[:todo_list_id])
-    todo = todo_list.todos.find(params[:id])
-
-    if todo.destroy
+    
+    if @todo.destroy
+       puts "Updated Todo: #{@todo.inspect}"
       render json: { message: 'Todo deleted successfully' }, status: :ok
     else
-      render json: { errors: todo.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @todo.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   private
+  
+  def set_todo_list
+    @todo_list = current_user.todo_lists.find_by(id: params[:todo_list_id])
+    unless @todo_list
+      render json: { error: "Todo list not found" }, status: :not_found 
+    end
+  end
+
+  def set_todo
+    @todo = @todo_list.todos.find_by(id: params[:id])
+    unless @todo
+      render json: { error: "Todo not found" }, status: :not_found 
+    end
+  end
+
   def todo_params
-    params.require(:todo).permit(:title,  :status)
+    params.require(:todo).permit(:title, :status)
   end
 end

@@ -1,6 +1,9 @@
 FactoryBot.define do
   factory :todo_list do
-    title { "MyString" }
-    user { nil }
+    title { Faker::Lorem.sentence }
+    association :user
   end
 end
+
+
+

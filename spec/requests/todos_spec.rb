@@ -1,65 +1,92 @@
 require 'rails_helper'
 
 RSpec.describe "Todos API", type: :request do
-  # Create test data
-  let!(:todos) { create_list(:todo, 5) }
+  let(:user) { create(:user) }
+  let(:todo_list) { create(:todo_list, user: user) }
+  let(:headers) { user.create_new_auth_token }
+  let!(:todos) { create_list(:todo, 5, todo_list: todo_list) }
   let(:todo_id) { todos.first.id }
 
   # Index
-  describe "GET /todos" do
+  describe "GET /todo_lists/:todo_list_id/todos" do
     it "returns all todos" do
-      get '/todos'
+      get "/todo_lists/#{todo_list.id}/todos", headers: headers
 
       expect(response).to have_http_status(:ok)
-      expect(JSON.parse(response.body).size).to eq(5)
+      expect(json.size).to eq(5)
     end
   end
 
   # Create
-  describe "POST /todos" do
-    let(:valid_attributes) { { todo: { title: 'New Todo', completed: false } } }
+describe "POST /todo_list/:todo_list_id/todos" do
+  let(:valid_attributes) { { title: "New Todo", status: "pending" } }
+  let(:invalid_attributes) { { title: "", status: "" } }
 
-    context "when the request is valid" do
-      it "creates a new todo" do
-        post '/todos', params: valid_attributes
+  context "with valid attributes" do
+    it "creates a new todo" do
 
-        expect(response).to have_http_status(:created)
-        expect(JSON.parse(response.body)['title']).to eq('New Todo')
-      end
-    end
-
-    context "when the request is invalid" do
-      it "returns a validation error" do
-        post '/todos', params: { todo: { completed: false } } # Missing title
-
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body)['errors']).to include("Title can't be blank")
-      end
+      post todo_list_todos_path(todo_list_id: todo_list.id), 
+           params: { todo: valid_attributes }, headers: headers
+      expect(response).to have_http_status(:created)
+      expect(json['title']).to eq(valid_attributes[:title])
     end
   end
 
-  # Update
-  describe "PUT /todos/:id" do
-    let(:valid_attributes) { { completed: true } }
+  context "with invalid attributes" do
+    it "returns an error" do
+      post todo_list_todos_path(todo_list_id: todo_list.id), 
+           params: { todo: invalid_attributes }, headers: headers
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(json['errors']).to include("Title can't be blank")
+    end
+  end
+end
 
-    context "when the record exists" do
-      it "updates the todo" do
-        put "/todos/#{todo_id}", params: valid_attributes
+# Update
+ describe "PUT /todo_list/:todo_list_id/todos/:id" do
+  let!(:todo) { create(:todo, todo_list: todo_list, title: "Old Title", status: "pending") }
+  let(:valid_update) { { title: "Updated Title", status: "completed" } }
+  let(:invalid_update) { { title: "", status: "" } }
 
-        expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)['completed']).to eq(true)
+  context "with valid attributes" do
+    it "updates the todo" do
+      put todo_list_todo_path(todo_list_id: todo_list.id, id: todo.id), 
+          params: { todo: valid_update }, headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json['title']).to eq(valid_update[:title])
+      expect(json['status']).to eq(valid_update[:status])
+    end
+  end
+
+  context "with invalid attributes" do
+    it "returns an error" do
+      put todo_list_todo_path(todo_list_id: todo_list.id, id: todo.id), 
+          params: { todo: invalid_update }, headers: headers
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(json['errors']).to include("Title can't be blank")
+    end
+  end
+
+  context "when todo is not found" do
+    it "returns a not found error" do
+      put todo_list_todo_path(todo_list_id: todo_list.id, id: 0), 
+          params: { todo: valid_update }, headers: headers
+
+      expect(response).to have_http_status(:not_found)
+      expect(json['error']).to eq("Todo not found")
       end
     end
   end
 
   # Destroy
-  describe "DELETE /todos/:id" do
+  describe "DELETE /todo_lists/:todo_list_id/todos/:id" do
     context "when the record exists" do
       it "deletes the todo" do
-        delete "/todos/#{todo_id}"
-
+        delete "/todo_lists/#{todo_list.id}/todos/#{todo_id}", headers: headers
         expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)['message']).to eq('Todo deleted successfully')
+        expect(json[:message]).to eq('Todo deleted successfully')
       end
     end
   end
