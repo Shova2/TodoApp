@@ -1,7 +1,7 @@
 class TodoListsController < ApplicationController
   skip_forgery_protection
    before_action :authenticate_user!
-   before_action :set_todo_list, only: [:destroy]
+   before_action :set_todo_list, only: [:destroy, :show, :update]
    
    #get/todo_lists
    def index
@@ -18,6 +18,20 @@ class TodoListsController < ApplicationController
       render json: { errors: todo_list.errors.full_messages }, status: :unprocessable_entity
     end
    end
+
+  #Show/todo_lists/:id
+   def show
+    render json: @todo_list, status: :ok
+   end
+
+   #update/todo_list/id
+   def update
+      if @todo_list.update(todo_list_params)
+        render json: @todo_list, status: :ok
+      else
+        render json: { errors: @todo_list.errors.full_messages }, status: :unprocessable_entity
+      end 
+    end
 
    #delete /todo_lists/:id
    def destroy

@@ -2,7 +2,7 @@ class TodosController < ApplicationController
   skip_forgery_protection
   before_action :authenticate_user!
   before_action :set_todo_list
-  before_action :set_todo, only: [:update, :destroy]
+  before_action :set_todo, only: [:update, :destroy, :show]
 
     # GET /todo_lists/:todos_list_id/todos
   def index
@@ -11,26 +11,28 @@ class TodosController < ApplicationController
   end
 
     # POST /todo_list/:todo_list_id/todos
-    def create
-      todo = @todo_list.todos.build(todo_params)
-      if todo.save
-        render json: todo, status: :created
-      else
-        render json: { errors: todo.errors.full_messages }, status: :unprocessable_entity
-      end
+  def create
+    todo = @todo_list.todos.build(todo_params)
+    if todo.save
+      render json: todo, status: :created
+    else
+      render json: { errors: todo.errors.full_messages }, status: :unprocessable_entity
     end
-    
+  end
 
+  #Get /todo_lists/:todo_list_id/todos/:id
+  def show
+    render json: @todo, status: :ok
+  end
 
   # PUT /todo_list/:todo_list_id/todos/:id
-def update
+  def update
   if @todo.update(todo_params)
     render json: @todo, status: :ok
   else
     render json: { errors: @todo.errors.full_messages }, status: :unprocessable_entity
+   end
   end
-end
-
 
   # DELETE  by /todo_list/:todo_list_id/todos/:id
   def destroy

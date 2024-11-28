@@ -7,6 +7,5 @@ class User < ApplicationRecord
             include DeviseTokenAuth::Concerns::User
     
     has_many :todo_lists, dependent: :destroy
-#     validates :name, presence: true
     validates :email, presence: true
 end

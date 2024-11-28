@@ -24,7 +24,6 @@ describe "POST /todo_list/:todo_list_id/todos" do
 
   context "with valid attributes" do
     it "creates a new todo" do
-
       post todo_list_todos_path(todo_list_id: todo_list.id), 
            params: { todo: valid_attributes }, headers: headers
       expect(response).to have_http_status(:created)
@@ -38,6 +37,25 @@ describe "POST /todo_list/:todo_list_id/todos" do
            params: { todo: invalid_attributes }, headers: headers
       expect(response).to have_http_status(:unprocessable_entity)
       expect(json['errors']).to include("Title can't be blank")
+    end
+  end
+end
+
+# show
+describe "GET /todo_lists/:todo_list_id/todo/:id" do
+   context"when the todo exists" do
+    it "returns the todo" do
+      get todo_list_todo_path(todo_list_id: todo_list.id, id: todo_id), headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json['id']).to eq(todo_id)
+    end
+  end
+  context "when the todo does not exist" do
+    it "returns a not found error" do
+      get todo_list_todo_path( todo_list.id, id: 0), headers: headers
+      expect(response).to have_http_status(:not_found)
+      expect(json['error']).to eq("Todo not found")
     end
   end
 end
