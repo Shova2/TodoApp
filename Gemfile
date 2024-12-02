@@ -17,11 +17,11 @@ gem 'devise_token_auth'
 gem "stimulus-rails"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
+gem 'pundit'
 gem 'rspec-rails', '~> 6.0'
 gem 'factory_bot_rails', '>= 0'
 gem 'faker'
 gem 'shoulda-matchers', '~> 5.0'
-
 
 
 
@@ -70,4 +70,5 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+  gem 'pundit-matchers'
 end
