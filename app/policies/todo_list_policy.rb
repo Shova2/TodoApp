@@ -1,18 +1,13 @@
 class TodoListPolicy < ApplicationPolicy
-  class Scope
-    attr_reader :user, :scope
+  # Check if the user is an owner
+  def user_is_owner?
+    record.owned_by?(user)
+  end
 
-    def initialize(user, scope)
-      @user = user
-      @scope = scope
-    end
-
-    def resolve
-      scope
-        .left_outer_joins(:collaborators)
-        .where("todo_lists.user_id = :user_id OR collaborators.user_id = :user_id", user_id: user.id)
-    end
-  end 
+  # Check if the user is a collaborator
+  def user_is_collaborator?
+    record.collaborated_by?(user)
+  end
 
   # User can view the TodoList if they own it or are a collaborator
   def show?
@@ -39,15 +34,11 @@ class TodoListPolicy < ApplicationPolicy
     true
   end
 
-  private
-
-  # Check if the user is the owner of the TodoList
-  def user_is_owner?
-    record.user_id == user.id
-  end
-
-  # Check if the user is a collaborator of the TodoList
-  def user_is_collaborator?
-    record.collaborators.exists?(user_id: user.id)
-  end
+  class Scope < Scope
+    def resolve
+      scope
+        .left_outer_joins(:collaborators)
+        .where("todo_lists.user_id = :user_id OR collaborators.user_id = :user_id", user_id: user.id)
+    end
+  end 
 end

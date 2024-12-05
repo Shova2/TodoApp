@@ -7,6 +7,21 @@ RSpec.describe "Collaborators", type: :request do
   let!(:collaborator) { create(:collaborator, user: other_user, todo_list: todo_list) }
   let(:headers) { user.create_new_auth_token }
 
+  describe "GET /todo_lists/:todo_list_id/collaborators" do
+      it "returns a list of collaborators" do
+        get "/todo_lists/#{todo_list.id}/collaborators", headers: headers
+
+        expect(response).to have_http_status(:ok)
+        expect(json.size).to eq(1)
+        expect(json.first['id']).to eq(collaborator.id)
+      end
+      it "returns an error when the user is unauthorized" do
+        get "/todo_lists/#{todo_list.id}/collaborators"
+        expect(response).to have_http_status(:unauthorized)
+        expect(json['errors']).to include('You need to sign in or sign up before continuing.')
+      end
+  end
+
   describe "POST /todo_lists/:todo_list_id/collaborators" do
     it "creates a new collaborator if the user is the owner of the todo list" do
       new_user = create(:user) # Create a new user to be added as a collaborator

@@ -1,6 +1,5 @@
 class TodoListsController < ApplicationController
   skip_forgery_protection
-  before_action :authenticate_user!
   before_action :set_todo_list, only: [:destroy, :show, :update]
 
   # GET /todo_lists
@@ -12,8 +11,7 @@ class TodoListsController < ApplicationController
   # POST /todo_lists
   def create
     todo_list = current_user.todo_lists.build(todo_list_params)
-    authorize todo_list
-
+    # authorize todo_list
     if todo_list.save
       render json: todo_list, status: :created
     else
@@ -53,7 +51,7 @@ class TodoListsController < ApplicationController
 
   def set_todo_list
     @todo_list = policy_scope(TodoList).find_by(id: params[:id])
-    render json: { error: "Todo list not found" }, status: :not_found unless @todo_list
+    raise ActiveRecord::RecordNotFound, 'Todo list not found' unless @todo_list
   end
 
   def todo_list_params

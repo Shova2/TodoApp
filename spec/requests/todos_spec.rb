@@ -38,7 +38,7 @@ RSpec.describe "Todos API", type: :request do
       it "returns no todos" do
         get "/todo_lists/#{todo_list.id}/todos", headers: non_member_headers
 
-        expect(response).to have_http_status(:not_found)
+        expect(response).to have_http_status(:forbidden)
       end 
     end
   end
@@ -79,7 +79,7 @@ RSpec.describe "Todos API", type: :request do
         post "/todo_lists/#{todo_list.id}/todos", 
             params: { todo: valid_attributes }, headers: non_member_headers
 
-        expect(response).to have_http_status(:not_found)
+        expect(response).to have_http_status(:forbidden)
       end
     end
   end
@@ -143,7 +143,7 @@ RSpec.describe "Todos API", type: :request do
         put "/todo_lists/#{todo_list.id}/todos/#{todo.id}", 
             params: { todo: valid_update }, headers: non_member_headers
 
-        expect(response).to have_http_status(:not_found)
+        expect(response).to have_http_status(:forbidden)
       end
     end
   end
