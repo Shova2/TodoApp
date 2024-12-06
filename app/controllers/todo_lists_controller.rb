@@ -11,7 +11,6 @@ class TodoListsController < ApplicationController
   # POST /todo_lists
   def create
     todo_list = current_user.todo_lists.build(todo_list_params)
-    # authorize todo_list
     if todo_list.save
       render json: todo_list, status: :created
     else

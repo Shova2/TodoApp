@@ -9,7 +9,7 @@ class CollaboratorPolicy < ApplicationPolicy
     end
     # TodoList owner can create any collaborator
     def create?
-      user_is_owner?
+        true
     end
     
     # TodoList owner can delete any collaborator

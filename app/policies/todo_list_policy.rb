@@ -9,6 +9,11 @@ class TodoListPolicy < ApplicationPolicy
     record.collaborated_by?(user)
   end
 
+  def add_todo?
+    user_is_owner? || user_is_collaborator?
+  end
+
+
   # User can view the TodoList if they own it or are a collaborator
   def show?
     user_is_owner? || user_is_collaborator?

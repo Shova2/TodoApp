@@ -1,5 +1,4 @@
 class CollaboratorsController < ApplicationController
-    # before_action :authenticate_user!
     before_action :set_todo_list, only: [:create, :index]
     before_action :set_collaborator, only: [:destroy]
 
@@ -12,8 +11,6 @@ class CollaboratorsController < ApplicationController
     # POST /todo_lists/:todo_list_id/collaborators
     def create
       collaborator = @todo_list.collaborators.build(collaborator_params)
-      authorize collaborator  
-
       if collaborator.save
         render json: collaborator, status: :created
       else

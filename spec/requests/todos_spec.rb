@@ -38,7 +38,7 @@ RSpec.describe "Todos API", type: :request do
       it "returns no todos" do
         get "/todo_lists/#{todo_list.id}/todos", headers: non_member_headers
 
-        expect(response).to have_http_status(:forbidden)
+        expect(response).to have_http_status(:not_found)
       end 
     end
   end
@@ -75,11 +75,11 @@ RSpec.describe "Todos API", type: :request do
       let(:non_member_user) { create(:user) }
       let(:non_member_headers) { non_member_user.create_new_auth_token }
 
-      it "returns a forbidden error" do
+      it "returns a not found error" do
         post "/todo_lists/#{todo_list.id}/todos", 
             params: { todo: valid_attributes }, headers: non_member_headers
 
-        expect(response).to have_http_status(:forbidden)
+        expect(response).to have_http_status(:not_found)
       end
     end
   end
@@ -139,11 +139,11 @@ RSpec.describe "Todos API", type: :request do
       let(:non_member_user) { create(:user) }
       let(:non_member_headers) { non_member_user.create_new_auth_token }
 
-      it "returns a forbidden error" do
+      it "returns a not found error" do
         put "/todo_lists/#{todo_list.id}/todos/#{todo.id}", 
             params: { todo: valid_update }, headers: non_member_headers
 
-        expect(response).to have_http_status(:forbidden)
+        expect(response).to have_http_status(:not_found)
       end
     end
   end

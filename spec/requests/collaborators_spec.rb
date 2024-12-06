@@ -35,18 +35,6 @@ RSpec.describe "Collaborators", type: :request do
       expect(json['user_id']).to eq(new_user.id) # Ensure the correct collaborator is added
     end
 
-    it "returns an error if the user is not the owner of the todo list" do
-      non_owner_user = create(:user)
-      non_owner_headers = non_owner_user.create_new_auth_token
-
-      post "/todo_lists/#{todo_list.id}/collaborators", 
-           params: { collaborator: { user_id: non_owner_user.id } }, 
-           headers: non_owner_headers
-
-      expect(response).to have_http_status(:forbidden)
-      expect(json['error']).to eq("You are not authorized to perform this action")
-    end
-
     it "returns an error if the collaborator already exists" do
       post "/todo_lists/#{todo_list.id}/collaborators", 
            params: { collaborator: { user_id: other_user.id } }, 

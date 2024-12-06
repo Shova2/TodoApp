@@ -3,26 +3,30 @@ class TodosController < ApplicationController
   before_action :set_todo_list
   before_action :set_todo, only: [:update, :destroy, :show]
 
-    # GET /todo_lists/:todos_list_id/todos
-  def index
-    authorize @todo_list, :show?
-    todos = @todo_list.todos
-    render json: todos, status: :ok
+ 
+   def index
+    @todo_list = policy_scope(TodoList).find_by(id: params[:todo_list_id])
+
+    if @todo_list
+      todos = @todo_list.todos
+      render json: todos, status: :ok
+    else
+      render json: { error: 'Todo list not found or unauthorized' }, status: :not_found
+    end
   end
-
-    # POST /todo_list/:todo_list_id/todos
+  
+  # POST /todo_list/:todo_list_id/todos
   def create
+    return unless @todo_list 
+    authorize @todo_list, :add_todo?
+
     todo = @todo_list.todos.build(todo_params)
-
-    authorize todo
-
     if todo.save
       render json: todo, status: :created
     else
       render json: { errors: todo.errors.full_messages }, status: :unprocessable_entity
     end
   end
-
 
   #Get /todo_lists/:todo_list_id/todos/:id
   def show
@@ -32,7 +36,6 @@ class TodosController < ApplicationController
 
   # PUT /todo_list/:todo_list_id/todos/:id
   def update
-    authorize @todo
 
     if @todo.update(todo_params)
       render json: @todo, status: :ok
@@ -55,7 +58,8 @@ class TodosController < ApplicationController
 
   private
   def set_todo_list
-    @todo_list = TodoList.find(params[:todo_list_id])
+    @todo_list = policy_scope(TodoList).find_by(id: params[:todo_list_id])
+    render json: { error: 'Todo list not found' }, status: :not_found unless @todo_list
   end
   
   def set_todo
@@ -66,4 +70,5 @@ class TodosController < ApplicationController
   def todo_params
     params.require(:todo).permit(:title, :status)
   end
-end
+
+  
